@@ -3,8 +3,8 @@ POST http://localhost:4000/patients
 Content-Type: application/json
 
 {
-  "name": "John Doe Kafka Test",
-  "email": "test@gmail.com",
+  "name": "virat kohli",
+  "email": "Mine@gmail.com",
   "address": "123 main street22",
   "dateOfBirth": "1995-09-09",
   "registeredDate": "2024-11-28"
