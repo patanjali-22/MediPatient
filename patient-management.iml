@@ -12,5 +12,27 @@
     <orderEntry type="library" name="Maven: org.springframework:spring-web:7.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.hibernate.orm:hibernate-core:7.2.0.Final" level="project" />
     <orderEntry type="library" name="Maven: com.jayway.jsonpath:json-path:2.10.0" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.data:spring-data-jpa:4.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.data:spring-data-commons:4.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.kafka:kafka-clients:4.1.1" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-context:7.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-web:7.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-config:7.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-crypto:7.0.2" level="project" />
+    <orderEntry type="library" name="Maven: com.google.api.grpc:proto-google-common-protos:2.48.0" level="project" />
+    <orderEntry type="library" name="Maven: io.swagger.core.v3:swagger-annotations-jakarta:2.2.25" level="project" />
+    <orderEntry type="module-library" scope="PROVIDED">
+      <library>
+        <CLASSES>
+          <root url="jar://$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="Maven: io.jsonwebtoken:jjwt-api:0.12.6" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-beans:7.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot:4.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-autoconfigure:4.0.1" level="project" />
   </component>
 </module>
