@@ -129,32 +129,32 @@ public class LocalStack extends Stack {
                 .build();
     }
 
-//    private CfnHealthCheck createDbHealthCheck(DatabaseInstance db, String id){
-//        return CfnHealthCheck.Builder.create(this, id)
-//                .healthCheckConfig(CfnHealthCheck.HealthCheckConfigProperty.builder()
-//                        .type("TCP")
-//                        .port(Token.asNumber(db.getDbInstanceEndpointPort()))
-//                        .ipAddress(db.getDbInstanceEndpointAddress())
-//                        .requestInterval(30)
-//                        .failureThreshold(3)
-//                        .build())
-//                .build();
-//    }
-//
-//    private CfnCluster createMskCluster(){
-//        return CfnCluster.Builder.create(this, "MskCluster")
-//                .clusterName("kafa-cluster")
-//                .kafkaVersion("2.8.0")
-//                .numberOfBrokerNodes(1)
-//                .brokerNodeGroupInfo(CfnCluster.BrokerNodeGroupInfoProperty.builder()
-//                        .instanceType("kafka.m5.xlarge")
-//                        .clientSubnets(vpc.getPrivateSubnets().stream()
-//                                .map(ISubnet::getSubnetId)
-//                                .collect(Collectors.toList()))
-//                        .brokerAzDistribution("DEFAULT")
-//                        .build())
-//                .build();
-//    }
+    private CfnHealthCheck createDbHealthCheck(DatabaseInstance db, String id){
+        return CfnHealthCheck.Builder.create(this, id)
+                .healthCheckConfig(CfnHealthCheck.HealthCheckConfigProperty.builder()
+                        .type("TCP")
+                        .port(Token.asNumber(db.getDbInstanceEndpointPort()))
+                        .ipAddress(db.getDbInstanceEndpointAddress())
+                        .requestInterval(30)
+                        .failureThreshold(3)
+                        .build())
+                .build();
+    }
+
+    private CfnCluster createMskCluster(){
+        return CfnCluster.Builder.create(this, "MskCluster")
+                .clusterName("kafa-cluster")
+                .kafkaVersion("2.8.0")
+                .numberOfBrokerNodes(1)
+                .brokerNodeGroupInfo(CfnCluster.BrokerNodeGroupInfoProperty.builder()
+                        .instanceType("kafka.m5.xlarge")
+                        .clientSubnets(vpc.getPrivateSubnets().stream()
+                                .map(ISubnet::getSubnetId)
+                                .collect(Collectors.toList()))
+                        .brokerAzDistribution("DEFAULT")
+                        .build())
+                .build();
+    }
 //
 //    private Cluster createEcsCluster(){
 //        return Cluster.Builder.create(this, "PatientManagementCluster")
