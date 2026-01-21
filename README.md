@@ -1,4 +1,4 @@
-# Patient Management (Microservices)
+# MediPatient(Patient Management Microservices)
 
 Patient Management is a microservices-based system built with **Java 21 + Spring Boot**.
 It demonstrates a typical healthcare-style domain split into services (patients, auth, billing, analytics) behind a single edge **API Gateway**, plus infrastructure provisioning for running locally on **LocalStack**.
