@@ -217,7 +217,3 @@ api-requests/         # HTTP requests (JetBrains)
 grpc-requests/        # gRPC requests (JetBrains)
 integration-tests/    # JUnit + RestAssured
 ```
-
-## License
-
-Add a license of your choice (MIT/Apache 2.0/etc.).
