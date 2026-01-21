@@ -1129,8 +1129,8 @@
                   "brokerAzDistribution": "DEFAULT"
                 },
                 "clusterName": "kafa-cluster",
-                "kafkaVersion": "2.8.0",
-                "numberOfBrokerNodes": 1
+                "kafkaVersion": "3.8.x",
+                "numberOfBrokerNodes": 2
               }
             },
             "constructInfo": {
@@ -3009,9 +3009,9 @@
                               {
                                 "cidrIp": "0.0.0.0/0",
                                 "ipProtocol": "tcp",
-                                "fromPort": 80,
-                                "toPort": 80,
-                                "description": "Allow from anyone on port 80"
+                                "fromPort": 4004,
+                                "toPort": 4004,
+                                "description": "Allow from anyone on port 4004"
                               }
                             ],
                             "vpcId": {
@@ -3081,7 +3081,7 @@
                             "loadBalancerArn": {
                               "Ref": "APIGatewayServiceLBDA2B7609"
                             },
-                            "port": 80,
+                            "port": 4004,
                             "protocol": "HTTP"
                           }
                         },
