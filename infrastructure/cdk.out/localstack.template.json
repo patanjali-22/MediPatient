@@ -659,8 +659,8 @@
      "InstanceType": "kafka.m5.xlarge"
     },
     "ClusterName": "kafa-cluster",
-    "KafkaVersion": "2.8.0",
-    "NumberOfBrokerNodes": 1
+    "KafkaVersion": "3.8.x",
+    "NumberOfBrokerNodes": 2
    }
   },
   "PatientManagementCluster98E10F8D": {
@@ -1786,10 +1786,10 @@
     "SecurityGroupIngress": [
      {
       "CidrIp": "0.0.0.0/0",
-      "Description": "Allow from anyone on port 80",
-      "FromPort": 80,
+      "Description": "Allow from anyone on port 4004",
+      "FromPort": 4004,
       "IpProtocol": "tcp",
-      "ToPort": 80
+      "ToPort": 4004
      }
     ],
     "VpcId": {
@@ -1832,7 +1832,7 @@
     "LoadBalancerArn": {
      "Ref": "APIGatewayServiceLBDA2B7609"
     },
-    "Port": 80,
+    "Port": 4004,
     "Protocol": "HTTP"
    }
   },
