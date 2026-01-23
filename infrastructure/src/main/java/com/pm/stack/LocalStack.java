@@ -60,7 +60,9 @@ public class LocalStack extends Stack {
         CfnHealthCheck patientDbHealthCheck =
                 createDbHealthCheck(patientServiceDb, "PatientServiceDBHealthCheck");
 
-        CfnCluster mskCluster = createMskCluster();
+        // NOTE: MSK cluster removed - LocalStack has built-in Kafka support
+        // that works better than simulated MSK. Services connect to
+        // localhost.localstack.cloud:4510-4511 automatically.
 
         this.ecsCluster = createEcsCluster();
 
@@ -88,7 +90,7 @@ public class LocalStack extends Stack {
                         null,
                         null);
 
-        analyticsService.getNode().addDependency(mskCluster);
+        // Analytics service no longer depends on MSK - uses LocalStack built-in Kafka
 
         FargateService patientService = createFargateService("PatientService",
                 "patient-service",
@@ -101,7 +103,7 @@ public class LocalStack extends Stack {
         patientService.getNode().addDependency(patientServiceDb);
         patientService.getNode().addDependency(patientDbHealthCheck);
         patientService.getNode().addDependency(billingService);
-        patientService.getNode().addDependency(mskCluster);
+        // Patient service no longer depends on MSK - uses LocalStack built-in Kafka
 
         createApiGatewayService();
     }
@@ -142,6 +144,10 @@ public class LocalStack extends Stack {
                 .build();
     }
 
+    /*
+     * MSK Cluster creation commented out - LocalStack has built-in Kafka support
+     * that works more reliably. Services connect to localhost.localstack.cloud:4510-4511
+     *
     private CfnCluster createMskCluster(){
         return CfnCluster.Builder.create(this, "MskCluster")
                 .clusterName("kafa-cluster")
@@ -156,6 +162,7 @@ public class LocalStack extends Stack {
                         .build())
                 .build();
     }
+    */
 
     private Cluster createEcsCluster(){
         return Cluster.Builder.create(this, "PatientManagementCluster")
@@ -198,7 +205,7 @@ public class LocalStack extends Stack {
                                 .build()));
 
         Map<String, String> envVars = new HashMap<>();
-        envVars.put("SPRING_KAFKA_BOOTSTRAP_SERVERS", "localhost.localstack.cloud:4510, localhost.localstack.cloud:4511, localhost.localstack.cloud:4512");
+        envVars.put("SPRING_KAFKA_BOOTSTRAP_SERVERS", "host.docker.internal:9092");
 
         if(additionalEnvVars != null){
             envVars.putAll(additionalEnvVars);

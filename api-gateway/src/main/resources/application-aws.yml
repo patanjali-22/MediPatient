@@ -1,0 +1,75 @@
+server:
+  port: 4004
+
+spring:
+  cloud:
+    gateway:
+      # CORS configuration for frontend hosted on S3
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: false
+            maxAge: 3600
+      routes:
+        - id: auth-service-route
+          uri: http://auth-service.patient-management.local:4005
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=1
+
+        - id: patient-service-route
+          uri: http://patient-service.patient-management.local:4000
+          predicates:
+            - Path=/api/patients/**
+          filters:
+            - StripPrefix=1
+            - JWTValidation
+
+        - id: billing-service-route
+          uri: http://billing-service.patient-management.local:4001
+          predicates:
+            - Path=/api/billing/**
+          filters:
+            - StripPrefix=1
+            - JWTValidation
+
+        - id: analytics-service-route
+          uri: http://analytics-service.patient-management.local:4002
+          predicates:
+            - Path=/api/analytics/**
+          filters:
+            - StripPrefix=1
+            - JWTValidation
+
+        - id: api-docs-patient-route
+          uri: http://patient-service.patient-management.local:4000
+          predicates:
+            - Path=/api-docs/patients
+          filters:
+            - RewritePath=/api-docs/patients,/v3/api-docs
+
+        - id: api-docs-auth-route
+          uri: http://auth-service.patient-management.local:4005
+          predicates:
+            - Path=/api-docs/auth
+          filters:
+            - RewritePath=/api-docs/auth,/v3/api-docs
+
+# Health check endpoint for ALB
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
