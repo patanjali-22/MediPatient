@@ -5,7 +5,7 @@ It demonstrates a typical healthcare-style domain split into services (patients,
 
 ## Architecture
 
-> GitHub renders Mermaid diagrams automatically. If you’re viewing this somewhere that doesn’t, copy the code block into https://mermaid.live.
+> If the architecture diagram doesn't display, then copy the code block into https://mermaid.live.
 
 ```mermaid
 graph TD
