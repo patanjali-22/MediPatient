@@ -1,45 +1,8 @@
-# Patient Management (Microservices)
+# MediPatient(Patient Management Microservices)
 
-Patient Management is a microservices-based system built with **Java 21 + Spring Boot**.
+MediPatient is a microservices-based system built with **Java 21 + Spring Boot**.
 It demonstrates a typical healthcare-style domain split into services (patients, auth, billing, analytics) behind a single edge **API Gateway**, plus infrastructure provisioning for running locally on **LocalStack**.
 
-## Architecture
-
-> GitHub renders Mermaid diagrams automatically. If you’re viewing this somewhere that doesn’t, copy the code block into https://mermaid.live.
-
-```mermaid
-graph TD
-  Client[Client / Postman / JetBrains HTTP Client]
-
-  subgraph Edge
-    ALB[LocalStack ALB\n(lb-*.elb.localhost.localstack.cloud:4004)]
-    GW[api-gateway\nSpring Cloud Gateway\n:4004]
-  end
-
-  subgraph Services
-    AUTH[auth-service\nJWT + Security\n:4005]
-    PAT[patient-service\nREST + JPA\n:4000]
-    BILL[billing-service\nHTTP :4001\ngRPC :9001]
-    ANA[analytics-service\nKafka consumer\n:4002]
-  end
-
-  subgraph Data/Infra (LocalStack)
-    PG_AUTH[(Postgres - auth)]
-    PG_PAT[(Postgres - patient)]
-    MSK[(MSK / Kafka)]
-  end
-
-  Client -->|HTTP| ALB -->|HTTP| GW
-  GW -->|/auth/*| AUTH
-  GW -->|/api/*| PAT
-
-  AUTH --> PG_AUTH
-  PAT --> PG_PAT
-
-  PAT -->|gRPC| BILL
-  PAT -->|Publish events| MSK
-  ANA -->|Consume events| MSK
-```
 
 ## What’s in this repo
 
@@ -254,7 +217,3 @@ api-requests/         # HTTP requests (JetBrains)
 grpc-requests/        # gRPC requests (JetBrains)
 integration-tests/    # JUnit + RestAssured
 ```
-
-## License
-
-Add a license of your choice (MIT/Apache 2.0/etc.).
