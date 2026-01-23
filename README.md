@@ -1,84 +1,112 @@
-# MediPatient(Patient Management Microservices)
+# Patient Management (Microservices)
 
-MediPatient is a microservices-based system built with **Java 21 + Spring Boot**.
-It demonstrates a typical healthcare-style domain split into services (patients, auth, billing, analytics) behind a single edge **API Gateway**, plus infrastructure provisioning for running locally on **LocalStack**.
+Patient Management is a complete full-stack system built with **Java 21 + Spring Boot** microservices and a **React + Vite** frontend.
+It demonstrates a typical healthcare-style domain split into services (patients, auth, billing, analytics) behind a single edge **API Gateway**, with real-time event streaming via **Kafka**, and infrastructure provisioning for both **LocalStack** and real **AWS** environments.
 
+## Architecture
+
+> GitHub renders Mermaid diagrams automatically. If you’re viewing this somewhere that doesn’t, copy the code block into https://mermaid.live.
+
+```mermaid
+graph TD
+  User[User / Browser]
+
+  subgraph Frontend
+    App[React App\n(Vite)]
+  end
+
+  subgraph Edge
+    ALB[AWS ALB / LocalStack ALB\n:4004]
+    GW[api-gateway\nSpring Cloud Gateway\n:4004]
+  end
+
+  subgraph Services
+    AUTH[auth-service\nJWT + Security\n:4005]
+    PAT[patient-service\nREST + JPA\n:4000]
+    BILL[billing-service\nHTTP :4001\ngRPC :9001]
+    ANA[analytics-service\nKafka consumer\n:4002]
+  end
+
+  subgraph Data/Infra
+    PG_AUTH[(Postgres - auth)]
+    PG_PAT[(Postgres - patient)]
+    MSK[(MSK / Kafka)]
+  end
+
+  User -->|HTTPS| App
+  App -->|API Calls (HTTPS)| ALB
+  ALB -->|HTTP| GW
+  GW -->|/auth/*| AUTH
+  GW -->|/api/*| PAT
+
+  AUTH --> PG_AUTH
+  PAT --> PG_PAT
+
+  PAT -->|gRPC| BILL
+  PAT -->|Publish events| MSK
+  MSK -->|Consume events| ANA
+```
 
 ## What’s in this repo
 
+### Frontend
+- **frontend** (React + Vite + TypeScript)
+  - Modern UI for managing patients and viewing analytics.
+  - Uses **TanStack Query** for data fetching and caching.
+  - Integrated with **Stripe** for payments (in billing flow).
+
 ### Services
 - **api-gateway** (Spring Cloud Gateway)
-  - Single entrypoint for HTTP clients
-  - Runs on **port 4004**
+  - Single entrypoint for HTTP clients.
+  - Runs on **port 4004**.
 - **auth-service** (Spring Boot + Spring Security + JWT + JPA)
-  - Issues and validates JWTs
-  - Runs on **port 4005**
-  - Uses Postgres (provisioned via the infra stack; H2 exists for dev/test)
+  - Issues and validates JWTs.
+  - Runs on **port 4005**.
+  - Uses Postgres (provisioned via the infra stack; H2 exists for dev/test).
 - **patient-service** (Spring Boot + JPA + Validation)
-  - CRUD for patients
-  - Runs on **port 4000**
-  - Emits events to Kafka (MSK in the infra stack)
-  - Calls billing-service over gRPC
+  - CRUD for patients.
+  - Runs on **port 4000**.
+  - Emits `PatientCreated` and other events to **Kafka**.
+  - Calls billing-service over **gRPC**.
 - **billing-service** (Spring Boot + gRPC)
-  - Billing/account operations over HTTP and gRPC
-  - Runs on **HTTP 4001** and **gRPC 9001**
+  - Billing/account operations over HTTP and gRPC.
+  - Runs on **HTTP 4001** and **gRPC 9001**.
 - **analytics-service** (Spring Boot + Kafka)
-  - Consumes events and exposes analytics endpoints
-  - Runs on **port 4002**
+  - Consumes events from Kafka to track metrics (e.g., new patient registrations).
+  - Runs on **port 4002**.
 
 ### Infrastructure
 - **infrastructure/** is an AWS CDK (Java) app.
-- It provisions (for LocalStack):
-  - VPC
-  - ECS cluster + Fargate services
-  - ALB in front of `api-gateway`
-  - Postgres databases for auth-service and patient-service
-  - MSK (Kafka)
+- Supports two deployment targets:
+  1. **LocalStack**: Emulated AWS services locally.
+  2. **Real AWS**: Cost-efficient Fargate deployment (see `AWS_DEPLOYMENT.md`).
 
 ### Requests & tests
-- `api-requests/**` contains ready-to-run HTTP request files (JetBrains HTTP client)
-- `grpc-requests/**` contains gRPC HTTP client requests
-- `integration-tests/**` contains JUnit + RestAssured integration tests
-
-## Architecture (high level)
-
-Typical flow:
-1. Client calls **API Gateway** (`:4004`)
-2. Gateway routes auth endpoints to **auth-service** (`:4005`)
-3. Gateway routes patient endpoints to **patient-service** (`:4000`)
-4. patient-service talks to **billing-service** over gRPC (`:9001`)
-5. patient-service publishes Kafka events; **analytics-service** consumes them
+- `api-requests/**` contains ready-to-run HTTP request files (JetBrains HTTP client).
+- `grpc-requests/**` contains gRPC HTTP client requests.
+- `integration-tests/**` contains JUnit + RestAssured integration tests.
 
 ## Tech stack
-- Java 21
-- Spring Boot (services)
-- Spring Cloud Gateway (api-gateway)
-- PostgreSQL (RDS in CDK; LocalStack emulation)
-- Kafka/MSK (LocalStack emulation)
-- gRPC + Protobuf (patient-service ↔ billing-service)
-- AWS CDK v2 (Java)
-- JUnit + RestAssured (integration-tests)
+- **Frontend**: React, Vite, TypeScript, TanStack Query, Stripe elements.
+- **Backend**: Java 21, Spring Boot, Spring Cloud Gateway.
+- **Data**: PostgreSQL (RDS), Kafka (MSK).
+- **Communication**: REST (Frontend -> Backend), gRPC (Service -> Service), Kafka (Event-driven).
+- **Infrastructure**: AWS CDK v2 (Java), Docker, LocalStack.
+- **Testing**: JUnit 5, RestAssured, Vitest (Frontend).
 
 ## Prerequisites
-- Java 21
-- Maven (or use the included `mvnw` / `mvnw.cmd` in each module)
-- Docker + Docker Desktop
-- LocalStack
-- AWS CLI (for deploying the synthesized CloudFormation template into LocalStack)
-
-> Notes for Windows:
-> - Use `mvnw.cmd` (not `./mvnw`).
-> - Ensure Docker Desktop is running.
+- **Java 21**
+- **Node.js 20+** (for frontend)
+- **Docker + Docker Desktop**
+- **AWS CLI**
+- **CDK CLI** (`npm install -g aws-cdk`)
 
 ## Running locally (LocalStack)
-
-This repo is set up to synthesize an AWS CDK template and deploy it to LocalStack using AWS CLI.
 
 ### 1) Start LocalStack
 Start LocalStack in Docker, exposing the edge port:
 
 ```bash
-# Example (adjust to your setup)
 docker run --rm -it \
   -p 4566:4566 \
   -e SERVICES=cloudformation,ec2,ecs,elbv2,iam,logs,rds,route53,msk,servicediscovery \
@@ -96,7 +124,7 @@ docker build -t billing-service ./billing-service
 docker build -t analytics-service ./analytics-service
 ```
 
-### 3) Synthesize the CDK template
+### 3) Synthesize the CDK template (LocalStack)
 From `infrastructure/`:
 
 ```bash
@@ -105,115 +133,98 @@ cd infrastructure
 mvnw.cmd -DskipTests exec:java -Dexec.mainClass=com.pm.stack.LocalStack
 ```
 
-This generates `infrastructure/cdk.out/localstack.template.json`.
-
 ### 4) Deploy into LocalStack
 From `infrastructure/`:
 
 ```bash
-# If you’re on macOS/Linux:
-./localstack-deploy.sh
-
-# On Windows, run the equivalent AWS CLI commands (PowerShell):
+# Windows (PowerShell)
 $env:AWS_ACCESS_KEY_ID="test"
 $env:AWS_SECRET_ACCESS_KEY="test"
 $env:AWS_DEFAULT_REGION="us-east-1"
 aws --endpoint-url=http://localhost:4566 cloudformation deploy --stack-name patient-management --template-file .\\cdk.out\\localstack.template.json
-aws --endpoint-url=http://localhost:4566 elbv2 describe-load-balancers --query "LoadBalancers[0].DNSName" --output text
 ```
 
-The output DNS name will look like:
-
-```
-lb-<id>.elb.localhost.localstack.cloud
-```
-
-## Calling the API
-
-### Important: include the port
-The ALB listener for the API Gateway is **port 4004**.
-So always call:
-
-```
-http://lb-<id>.elb.localhost.localstack.cloud:4004
-```
-
-### Auth
-Use `api-requests/auth-service/login.http` to get a JWT.
-
-Typical endpoint:
-- `POST /auth/login`
-
-### Patients
-Use `api-requests/patient-service/*.http`.
-
-Typical endpoints:
-- `GET /api/patients`
-- `POST /api/patients`
-- `PUT /api/patients/{id}`
-- `DELETE /api/patients/{id}`
-
-## Ports
-| Component | Port(s) |
-|---|---:|
-| api-gateway | 4004 |
-| auth-service | 4005 |
-| patient-service | 4000 |
-| billing-service | 4001 (HTTP), 9001 (gRPC) |
-| analytics-service | 4002 |
-| LocalStack edge | 4566 |
-
-## Running tests
-
-### Unit tests
-From any service directory:
+### 5) Run Frontend
+From `frontend/`:
 
 ```bash
-mvnw.cmd test
+cd frontend
+npm install
+npm run dev
+```
+The frontend will run at `http://localhost:5173` (by default).
+
+## Deploying to AWS
+
+
+## Architecture Diagram
+
+```
+                    ┌─────────────────────────────────────────┐
+                    │              AWS Cloud                  │
+                    │                                         │
+   Internet ───────►│  ┌─────────┐    ┌──────────────────┐    │
+                    │  │   ALB   │───►│   API Gateway    │    │
+                    │  └─────────┘    │   (Fargate)      │    │
+                    │                 └────────┬─────────┘    │
+                    │                          │              │
+                    │     ┌────────────────────┼───────────┐  │
+                    │     │        Service Discovery       │  │
+                    │     │     (patient-management.local) │  │
+                    │     └────────────────────┼───────────┘  │
+                    │                          │              │
+                    │  ┌─────────┬─────────┬───┴───┬───────┐  │
+                    │  │  Auth   │ Patient │Billing│Analyt.│  │
+                    │  │ Service │ Service │Service│Service│  │
+                    │  │(Fargate)│(Fargate)│(Farg.)│(Farg.)│  │
+                    │  └────┬────┴────┬────┴───────┴───────┘  │
+                    │       │         │                       │
+                    │       └────┬────┘                       │
+                    │            ▼                            │
+                    │    ┌──────────────┐                     │
+                    │    │  RDS Postgres │                    │
+                    │    │   (Shared)    │                    │
+                    │    └──────────────┘                     │
+                    │                                         │
+                    └─────────────────────────────────────────┘
 ```
 
-### Integration tests
-From `integration-tests/`:
+We provide scripts to simplify the process:
+* **Windows**: `aws-deploy.ps1`
+* **Linux/Mac**: `aws-deploy.sh`
 
-```bash
-mvnw.cmd test
-```
+These scripts handle building images, pushing to ECR, and deploying the CDK stack.
 
-> The integration tests assume the system is already running (e.g., deployed in LocalStack).
+## Architecture & Data Flow
+
+### Patient Creation Flow
+1. **Frontend** sends `POST /api/patients` to **API Gateway**.
+2. **API Gateway** routes to **Patient Service**.
+3. **Patient Service**:
+  * Saves patient to Postgres (`patient` schema).
+  * Calls **Billing Service** via **gRPC** to initialize account.
+  * Publishes `PatientCreated` event to **Kafka**.
+4. **Analytics Service** consumes the event and updates dashboard metrics.
 
 ## Troubleshooting
 
-### `Connection refused` to `127.0.0.1:80`
-You’re calling the load balancer without specifying a port. Use:
+### Frontend connection issues
+* Ensure the `VITE_API_URL` environment variable is pointing to your ALB/Gateway (e.g., `http://localhost:4004` usually proxied or directly addressing the load balancer).
 
-- `http://lb-...elb.localhost.localstack.cloud:4004/...`
-
-### `Connection refused` to `127.0.0.1:4004`
-This means nothing is listening on your host on port 4004.
-Common causes:
-- LocalStack isn’t running
-- Docker Desktop isn’t running
-- The infra stack wasn’t deployed / ALB not created
-- The api-gateway task isn’t running/healthy
-
-### Where to look
-- LocalStack logs (Docker)
-- CloudFormation events:
-
-```bash
-aws --endpoint-url=http://localhost:4566 cloudformation describe-stack-events --stack-name patient-management
-```
+### Kafka/Analytics issues
+* If analytics aren't updating, check **MSK** logs in LocalStack or AWS.
+* Ensure **analytics-service** is up and consuming the correct topic.
 
 ## Repo layout
 
 ```
+frontend/             # React + Vite application
 api-gateway/          # Spring Cloud Gateway edge service
 auth-service/         # Auth + JWT
 patient-service/      # Patient CRUD + events
 billing-service/      # Billing + gRPC
 analytics-service/    # Kafka consumer + reporting
-infrastructure/       # AWS CDK (Java) for LocalStack
+infrastructure/       # AWS CDK (Java) for LocalStack & AWS
 api-requests/         # HTTP requests (JetBrains)
-grpc-requests/        # gRPC requests (JetBrains)
 integration-tests/    # JUnit + RestAssured
 ```
