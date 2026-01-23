@@ -9,42 +9,40 @@ It demonstrates a typical healthcare-style domain split into services (patients,
 
 ```mermaid
 graph TD
-  User[User / Browser]
+  User["User / Browser"]
 
   subgraph Frontend
-    App["React App\n(Vite)"]
+    App["React App<br/>(Vite)"]
   end
 
   subgraph Edge
-    ALB["AWS ALB / LocalStack ALB\n:4004"]
-    GW["api-gateway\nSpring Cloud Gateway\n:4004"]
+    ALB["AWS ALB / LocalStack ALB<br/>:4004"]
+    GW["api-gateway<br/>Spring Cloud Gateway<br/>:4004"]
   end
 
   subgraph Services
-    AUTH["auth-service\nJWT + Security\n:4005"]
-    PAT["patient-service\nREST + JPA\n:4000"]
-    BILL["billing-service\nHTTP :4001\ngRPC :9001"]
-    ANA["analytics-service\nKafka consumer\n:4002"]
+    AUTH["auth-service<br/>JWT + Security<br/>:4005"]
+    PAT["patient-service<br/>REST + JPA<br/>:4000"]
+    BILL["billing-service<br/>HTTP :4001<br/>gRPC :9001"]
+    ANA["analytics-service<br/>Kafka consumer<br/>:4002"]
   end
 
-  subgraph Data/Infra
-    PG_AUTH[(Postgres - auth)]
-    PG_PAT[(Postgres - patient)]
-    MSK[(MSK / Kafka)]
+  subgraph DataInfra["Data/Infra"]
+    PG_AUTH[("Postgres - auth")]
+    PG_PAT[("Postgres - patient")]
+    MSK[("MSK / Kafka")]
   end
 
   User -->|HTTPS| App
-  App -->|API Calls (HTTPS)| ALB
+  App -->|"API Calls (HTTPS)"| ALB
   ALB -->|HTTP| GW
-  GW -->|/auth/*| AUTH
-  GW -->|/api/*| PAT
-
+  GW -->|"/auth/*"| AUTH
+  GW -->|"/api/*"| PAT
   AUTH --> PG_AUTH
   PAT --> PG_PAT
-
   PAT -->|gRPC| BILL
-  PAT -->|Publish events| MSK
-  MSK -->|Consume events| ANA
+  PAT -->|"Publish events"| MSK
+  MSK -->|"Consume events"| ANA
 ```
 
 ## What’s in this repo
