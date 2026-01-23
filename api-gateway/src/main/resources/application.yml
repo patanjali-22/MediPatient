@@ -21,6 +21,24 @@ spring:
             - StripPrefix=1
             - JWTValidation
 
+        # Route for /api/billing/** to billing-service (payments)
+        - id: billing-service-route
+          uri: http://billing-service:4001
+          predicates:
+            - Path=/api/billing/**
+          filters:
+            - StripPrefix=1
+            - JWTValidation
+
+        # Route for /api/analytics/** to analytics-service (Kafka events)
+        - id: analytics-service-route
+          uri: http://analytics-service:4002
+          predicates:
+            - Path=/api/analytics/**
+          filters:
+            - StripPrefix=1
+            - JWTValidation
+
         # Route for /api/docs/patients to patient-service /v3/api-docs
         - id: api-docs-patient-route
           uri: http://patient-service:4000

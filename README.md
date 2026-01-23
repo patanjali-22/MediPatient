@@ -3,6 +3,44 @@
 Patient Management is a microservices-based system built with **Java 21 + Spring Boot**.
 It demonstrates a typical healthcare-style domain split into services (patients, auth, billing, analytics) behind a single edge **API Gateway**, plus infrastructure provisioning for running locally on **LocalStack**.
 
+## Architecture
+
+> GitHub renders Mermaid diagrams automatically. If you’re viewing this somewhere that doesn’t, copy the code block into https://mermaid.live.
+
+```mermaid
+graph TD
+  Client[Client / Postman / JetBrains HTTP Client]
+
+  subgraph Edge
+    ALB[LocalStack ALB\n(lb-*.elb.localhost.localstack.cloud:4004)]
+    GW[api-gateway\nSpring Cloud Gateway\n:4004]
+  end
+
+  subgraph Services
+    AUTH[auth-service\nJWT + Security\n:4005]
+    PAT[patient-service\nREST + JPA\n:4000]
+    BILL[billing-service\nHTTP :4001\ngRPC :9001]
+    ANA[analytics-service\nKafka consumer\n:4002]
+  end
+
+  subgraph Data/Infra (LocalStack)
+    PG_AUTH[(Postgres - auth)]
+    PG_PAT[(Postgres - patient)]
+    MSK[(MSK / Kafka)]
+  end
+
+  Client -->|HTTP| ALB -->|HTTP| GW
+  GW -->|/auth/*| AUTH
+  GW -->|/api/*| PAT
+
+  AUTH --> PG_AUTH
+  PAT --> PG_PAT
+
+  PAT -->|gRPC| BILL
+  PAT -->|Publish events| MSK
+  ANA -->|Consume events| MSK
+```
+
 ## What’s in this repo
 
 ### Services
@@ -54,7 +92,7 @@ Typical flow:
 - Spring Cloud Gateway (api-gateway)
 - PostgreSQL (RDS in CDK; LocalStack emulation)
 - Kafka/MSK (LocalStack emulation)
-- gRPC + Protobuf (patient-service  billing-service)
+- gRPC + Protobuf (patient-service ↔ billing-service)
 - AWS CDK v2 (Java)
 - JUnit + RestAssured (integration-tests)
 
@@ -110,15 +148,14 @@ This generates `infrastructure/cdk.out/localstack.template.json`.
 From `infrastructure/`:
 
 ```bash
-# If you
-re on macOS/Linux:
+# If you’re on macOS/Linux:
 ./localstack-deploy.sh
 
 # On Windows, run the equivalent AWS CLI commands (PowerShell):
 $env:AWS_ACCESS_KEY_ID="test"
 $env:AWS_SECRET_ACCESS_KEY="test"
 $env:AWS_DEFAULT_REGION="us-east-1"
-aws --endpoint-url=http://localhost:4566 cloudformation deploy --stack-name patient-management --template-file .\cdk.out\localstack.template.json
+aws --endpoint-url=http://localhost:4566 cloudformation deploy --stack-name patient-management --template-file .\\cdk.out\\localstack.template.json
 aws --endpoint-url=http://localhost:4566 elbv2 describe-load-balancers --query "LoadBalancers[0].DNSName" --output text
 ```
 
@@ -184,23 +221,17 @@ mvnw.cmd test
 ## Troubleshooting
 
 ### `Connection refused` to `127.0.0.1:80`
-You
-re calling the load balancer without specifying a port.
-Use:
+You’re calling the load balancer without specifying a port. Use:
 
 - `http://lb-...elb.localhost.localstack.cloud:4004/...`
 
 ### `Connection refused` to `127.0.0.1:4004`
 This means nothing is listening on your host on port 4004.
 Common causes:
-- LocalStack isn
-t running
-- Docker Desktop isn
-t running
-- The infra stack wasn
-t deployed / ALB not created
-- The api-gateway task isn
-t running/healthy
+- LocalStack isn’t running
+- Docker Desktop isn’t running
+- The infra stack wasn’t deployed / ALB not created
+- The api-gateway task isn’t running/healthy
 
 ### Where to look
 - LocalStack logs (Docker)
@@ -223,3 +254,7 @@ api-requests/         # HTTP requests (JetBrains)
 grpc-requests/        # gRPC requests (JetBrains)
 integration-tests/    # JUnit + RestAssured
 ```
+
+## License
+
+Add a license of your choice (MIT/Apache 2.0/etc.).

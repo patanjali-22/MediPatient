@@ -78,6 +78,13 @@
             <artifactId>spring-kafka</artifactId>
             <version>3.3.0</version>
         </dependency>
+
+        <!-- Stripe Payment SDK -->
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>24.15.0</version>
+        </dependency>
     </dependencies>
 
     <build>

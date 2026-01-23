@@ -643,26 +643,6 @@
     }
    }
   },
-  "MskCluster": {
-   "Type": "AWS::MSK::Cluster",
-   "Properties": {
-    "BrokerNodeGroupInfo": {
-     "BrokerAZDistribution": "DEFAULT",
-     "ClientSubnets": [
-      {
-       "Ref": "PatientManagementVPCPrivateSubnet1Subnet05B10E79"
-      },
-      {
-       "Ref": "PatientManagementVPCPrivateSubnet2Subnet8A2E409C"
-      }
-     ],
-     "InstanceType": "kafka.m5.xlarge"
-    },
-    "ClusterName": "kafa-cluster",
-    "KafkaVersion": "3.8.x",
-    "NumberOfBrokerNodes": 2
-   }
-  },
   "PatientManagementCluster98E10F8D": {
    "Type": "AWS::ECS::Cluster"
   },
@@ -760,7 +740,7 @@
        },
        {
         "Name": "SPRING_KAFKA_BOOTSTRAP_SERVERS",
-        "Value": "localhost.localstack.cloud:4510, localhost.localstack.cloud:4511, localhost.localstack.cloud:4512"
+        "Value": "host.docker.internal:9092"
        }
       ],
       "Essential": true,
@@ -966,7 +946,7 @@
       "Environment": [
        {
         "Name": "SPRING_KAFKA_BOOTSTRAP_SERVERS",
-        "Value": "localhost.localstack.cloud:4510, localhost.localstack.cloud:4511, localhost.localstack.cloud:4512"
+        "Value": "host.docker.internal:9092"
        }
       ],
       "Essential": true,
@@ -1165,7 +1145,7 @@
       "Environment": [
        {
         "Name": "SPRING_KAFKA_BOOTSTRAP_SERVERS",
-        "Value": "localhost.localstack.cloud:4510, localhost.localstack.cloud:4511, localhost.localstack.cloud:4512"
+        "Value": "host.docker.internal:9092"
        }
       ],
       "Essential": true,
@@ -1312,8 +1292,7 @@
     }
    },
    "DependsOn": [
-    "AnalyticsServiceTaskTaskRole1ABB10CB",
-    "MskCluster"
+    "AnalyticsServiceTaskTaskRole1ABB10CB"
    ]
   },
   "AnalyticsServiceSecurityGroupBA6AE98A": {
@@ -1332,8 +1311,7 @@
     }
    },
    "DependsOn": [
-    "AnalyticsServiceTaskTaskRole1ABB10CB",
-    "MskCluster"
+    "AnalyticsServiceTaskTaskRole1ABB10CB"
    ]
   },
   "PatientServiceTaskTaskRole4FB5B4E2": {
@@ -1421,7 +1399,7 @@
        },
        {
         "Name": "SPRING_KAFKA_BOOTSTRAP_SERVERS",
-        "Value": "localhost.localstack.cloud:4510, localhost.localstack.cloud:4511, localhost.localstack.cloud:4512"
+        "Value": "host.docker.internal:9092"
        },
        {
         "Name": "BILLING_SERVICE_ADDRESS",
@@ -1574,7 +1552,6 @@
    "DependsOn": [
     "BillingServiceSecurityGroup3783AD35",
     "BillingServiceFEB36D90",
-    "MskCluster",
     "PatientServiceDBB84F9BF9",
     "PatientServiceDBSecretAttachment90D77B03",
     "localstackPatientServiceDBSecret20E0A9443fdaad7efa858a3daf9490cf0a702aeb",
@@ -1602,7 +1579,6 @@
    "DependsOn": [
     "BillingServiceSecurityGroup3783AD35",
     "BillingServiceFEB36D90",
-    "MskCluster",
     "PatientServiceDBB84F9BF9",
     "PatientServiceDBSecretAttachment90D77B03",
     "localstackPatientServiceDBSecret20E0A9443fdaad7efa858a3daf9490cf0a702aeb",
@@ -1636,12 +1612,12 @@
      {
       "Environment": [
        {
-        "Name": "SPRING_PROFILES_ACTIVE",
-        "Value": "prod"
-       },
-       {
         "Name": "AUTH_SERVICE_URL",
         "Value": "http://host.docker.internal:4005"
+       },
+       {
+        "Name": "SPRING_PROFILES_ACTIVE",
+        "Value": "prod"
        }
       ],
       "Essential": true,
