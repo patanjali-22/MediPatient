@@ -12,19 +12,19 @@ graph TD
   User[User / Browser]
 
   subgraph Frontend
-    App[React App\n(Vite)]
+    App["React App\n(Vite)"]
   end
 
   subgraph Edge
-    ALB[AWS ALB / LocalStack ALB\n:4004]
-    GW[api-gateway\nSpring Cloud Gateway\n:4004]
+    ALB["AWS ALB / LocalStack ALB\n:4004"]
+    GW["api-gateway\nSpring Cloud Gateway\n:4004"]
   end
 
   subgraph Services
-    AUTH[auth-service\nJWT + Security\n:4005]
-    PAT[patient-service\nREST + JPA\n:4000]
-    BILL[billing-service\nHTTP :4001\ngRPC :9001]
-    ANA[analytics-service\nKafka consumer\n:4002]
+    AUTH["auth-service\nJWT + Security\n:4005"]
+    PAT["patient-service\nREST + JPA\n:4000"]
+    BILL["billing-service\nHTTP :4001\ngRPC :9001"]
+    ANA["analytics-service\nKafka consumer\n:4002"]
   end
 
   subgraph Data/Infra
